@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Color Screen</title>
+    <style>
+        /* Reset margins and make the app take up the entire screen */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: #1c1c1e; /* Dark default background */
+            transition: background-color 0.15s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Pushes content to the bottom */
+            align-items: center;
+            overflow: hidden;
+            touch-action: manipulation; /* Prevents double-tap zooming */
+        }
+
+        /* Container for the 3 dots */
+        .controls {
+            display: flex;
+            gap: 30px;
+            padding-bottom: 50px; /* Space from the bottom of the screen */
+        }
+
+        /* Styling for the color dots */
+        .dot {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            outline: none;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap in mobile Safari */
+            transition: transform 0.1s;
+        }
+
+        /* The three specific colors */
+        .dot.red { background-color: #ff3b30; }
+        .dot.orange { background-color: #ff9500; }
+        .dot.green { background-color: #34c759; }
+
+        /* A slight shrink effect when you tap the button */
+        .dot:active {
+            transform: scale(0.9);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button class="dot red" onclick="setColor('#ff3b30')"></button>
+        <button class="dot orange" onclick="setColor('#ff9500')"></button>
+        <button class="dot green" onclick="setColor('#34c759')"></button>
+    </div>
+
+    <script>
+        let wakeLock = null;
+
+        // Function to request that the screen stays awake and doesn't dim
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (err) {
+                    console.log(`Wake Lock error: ${err.name}, ${err.message}`);
+                }
+            }
+        }
+
+        // Function to change the background color
+        function setColor(color) {
+            document.body.style.backgroundColor = color;
+            
+            // Browsers require a user interaction (like a tap) before granting a wake lock
+            if (!wakeLock) {
+                requestWakeLock();
+            }
+        }
+
+        // If the user switches away from the app and comes back, re-enable the wake lock
+        document.addEventListener('visibilitychange', () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>
