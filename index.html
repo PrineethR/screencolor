@@ -2,33 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Color Screen</title>
     <style>
-        /* Reset margins and make the app take up the entire screen */
+        /* The Fix: position: fixed locks the body exactly to the visible screen edges */
         body {
             margin: 0;
             padding: 0;
-            height: 100vh;
-            width: 100vw;
-            background-color: #1c1c1e; /* Dark default background */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #1c1c1e;
             transition: background-color 0.15s ease-in-out;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-end; /* Pushes content to the bottom */
-            align-items: center;
-            overflow: hidden;
-            touch-action: manipulation; /* Prevents double-tap zooming */
+            justify-content: center; /* Centers horizontally */
+            align-items: flex-end;   /* Pushes items to the bottom */
+            touch-action: manipulation;
         }
 
-        /* Container for the 3 dots */
         .controls {
             display: flex;
             gap: 30px;
-            padding-bottom: 50px; /* Space from the bottom of the screen */
+            /* The Fix: env(safe-area-inset-bottom) pushes the buttons up if your phone has a swipe bar at the bottom */
+            padding-bottom: calc(50px + env(safe-area-inset-bottom)); 
         }
 
-        /* Styling for the color dots */
         .dot {
             width: 70px;
             height: 70px;
@@ -37,16 +37,14 @@
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             outline: none;
-            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap in mobile Safari */
+            -webkit-tap-highlight-color: transparent;
             transition: transform 0.1s;
         }
 
-        /* The three specific colors */
         .dot.red { background-color: #ff3b30; }
         .dot.orange { background-color: #ff9500; }
         .dot.green { background-color: #34c759; }
 
-        /* A slight shrink effect when you tap the button */
         .dot:active {
             transform: scale(0.9);
         }
@@ -63,7 +61,6 @@
     <script>
         let wakeLock = null;
 
-        // Function to request that the screen stays awake and doesn't dim
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try {
@@ -74,17 +71,14 @@
             }
         }
 
-        // Function to change the background color
         function setColor(color) {
             document.body.style.backgroundColor = color;
             
-            // Browsers require a user interaction (like a tap) before granting a wake lock
             if (!wakeLock) {
                 requestWakeLock();
             }
         }
 
-        // If the user switches away from the app and comes back, re-enable the wake lock
         document.addEventListener('visibilitychange', () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {
                 requestWakeLock();
