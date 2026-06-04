@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Color Screen</title>
     <style>
-        /* The Fix: position: fixed locks the body exactly to the visible screen edges */
         body {
             margin: 0;
             padding: 0;
@@ -15,27 +14,27 @@
             right: 0;
             bottom: 0;
             background-color: #1c1c1e;
-            transition: background-color 0.15s ease-in-out;
+            transition: background-color 0.25s ease-in-out;
             display: flex;
-            justify-content: center; /* Centers horizontally */
-            align-items: flex-end;   /* Pushes items to the bottom */
+            justify-content: center;
+            align-items: flex-end;
             touch-action: manipulation;
         }
 
         .controls {
             display: flex;
-            gap: 30px;
-            /* The Fix: env(safe-area-inset-bottom) pushes the buttons up if your phone has a swipe bar at the bottom */
-            padding-bottom: calc(50px + env(safe-area-inset-bottom)); 
+            gap: 25px; /* Slightly reduced gap to fit larger buttons */
+            padding-bottom: calc(60px + env(safe-area-inset-bottom)); 
         }
 
         .dot {
-            width: 70px;
-            height: 70px;
+            /* Increased size from 70px to 95px */
+            width: 95px;
+            height: 95px;
             border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.8);
+            border: 5px solid rgba(255, 255, 255, 0.8);
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             outline: none;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.1s;
@@ -61,6 +60,7 @@
     <script>
         let wakeLock = null;
 
+        // Screen Wake Lock
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try {
@@ -71,17 +71,36 @@
             }
         }
 
+        // Change Color
         function setColor(color) {
             document.body.style.backgroundColor = color;
-            
             if (!wakeLock) {
                 requestWakeLock();
             }
         }
 
+        // Re-enable Wake Lock on visibility change
         document.addEventListener('visibilitychange', () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {
                 requestWakeLock();
+            }
+        });
+
+        // Toggle Full-Screen Mode
+        document.body.addEventListener('click', (e) => {
+            // Ensure clicking the buttons doesn't trigger the background full-screen toggle
+            if (e.target.tagName !== 'BUTTON') {
+                if (!document.fullscreenElement) {
+                    // Enter full screen
+                    document.documentElement.requestFullscreen().catch((err) => {
+                        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    // Exit full screen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
             }
         });
     </script>
